@@ -16,7 +16,7 @@ headers = {
     'content-type': 'application/json',
     # 'dnt': 1,
     # 'origin': 'https://sploitus.com',
-    'referer': 'https://sploitus.com/?query=Moodle',
+    # 'referer': 'https://sploitus.com/?query=Moodle',
     # 'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
     # 'sec-ch-ua-mobile': '?0',
     # 'sec-ch-ua-platform': '"Windows"',
@@ -36,25 +36,26 @@ class SploitusAssistant:
             sort: str = 'default',
             title: bool = False,
             offset: int = 0,
-            sploitus_search_url: str = 'https://sploitus.com/search',
+            sploitus_url: str = 'https://sploitus.com',
             semaphore: int = 4
     ) -> None:
         self.tz = timezone(getenv('TZ', 'UTC'))
         self.targets = targets
         self.headers_dict = headers
-        self.headers_for_curl = ' '.join([f"-H '{k}: {v}'" for k, v in headers.items()])
         self.type = targets_type
         self.sort = sort
         self.title = title
         self.offset = offset
-        self.sploitus_search_url = sploitus_search_url
+        self.sploitus_url = sploitus_url
         self.semaphore = semaphore
         self.result = self.__scan()
 
     def __run_curl_sploitus(self, target: str, output: list) -> None:
-        cmd = "curl -s '{search_url}' {headers} --data-raw '{data}' --compressed".format(
-            search_url=self.sploitus_search_url,
-            headers=self.headers_for_curl,
+        self.headers_dict.update({'referer': f'{self.sploitus_url}/?query={target}'})
+        headers_for_curl = ' '.join([f"-H '{k}: {v}'" for k, v in self.headers_dict.items()])
+        cmd = "curl -s '{search_url}/search' {headers} --data-raw '{data}' --compressed".format(
+            search_url=self.sploitus_url,
+            headers=headers_for_curl,
             data=dumps(
                 {
                     'type': self.type,
