@@ -36,6 +36,7 @@ class SploitusAssistant:
             sort: str = 'default',
             title: bool = False,
             offset: int = 0,
+            sploitus_search_url: str = 'https://sploitus.com/search',
             semaphore: int = 4
     ) -> None:
         self.tz = timezone(getenv('TZ', 'UTC'))
@@ -46,11 +47,13 @@ class SploitusAssistant:
         self.sort = sort
         self.title = title
         self.offset = offset
+        self.sploitus_search_url = sploitus_search_url
         self.semaphore = semaphore
         self.result = self.__scan()
 
     def __run_curl_sploitus(self, target: str, output: list) -> None:
-        cmd = "curl -s 'https://sploitus.com/search' {headers} --data-raw '{data}' --compressed".format(
+        cmd = "curl -s '{search_url}' {headers} --data-raw '{data}' --compressed".format(
+            search_url=self.sploitus_search_url,
             headers=self.headers_for_curl,
             data=dumps(
                 {
