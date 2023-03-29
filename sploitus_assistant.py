@@ -28,6 +28,17 @@ headers = {
 
 
 class SploitusAssistant:
+    '''
+    Class work with [sploitus.com](https://sploitus.com/)
+    `targets`: targets for information
+    `headers`: headers for `http` request
+    `targets_type`: info type for targets (`exploits` or `tools`)
+    `sort`: sort results (`default`, `date` or `score`)
+    `title`: hide or show titles (default: `False`)
+    `offset`: results offset (default: `0`)
+    `sploitus_url`: URL sploitus (default: `https://sploitus.com`)
+    `semaphore`: number of simultaneously running curl processes (default: `4`)
+    '''
     def __init__(
             self,
             targets: List[str],
@@ -51,6 +62,11 @@ class SploitusAssistant:
         self.result = self.__scan()
 
     def __run_curl_sploitus(self, target: str, output: list) -> None:
+        '''
+        Starting a curl process to request sploitus
+        `target`: the target for information
+        `output`: the list to save results
+        '''
         self.headers_dict.update({'referer': f'{self.sploitus_url}/?query={target}'})
         headers_for_curl = ' '.join([f"-H '{k}: {v}'" for k, v in self.headers_dict.items()])
         cmd = "curl -s '{search_url}/search' {headers} --data-raw '{data}' --compressed".format(
@@ -88,6 +104,9 @@ class SploitusAssistant:
             self.__run_curl_sploitus(argv, **kw)
 
     def __scan(self) -> Dict[str, dict]:
+        '''
+        Method to start getting information for all targets
+        '''
         sem = Semaphore(self.semaphore)
         threads = []
         output = []
