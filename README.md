@@ -10,8 +10,7 @@ Micro-library for data output from [sploitus.com](https://sploitus.com/).
 ## 1. Dependencies
 
 - [curl](https://curl.se/);
-- [Python 3.10 or newer](https://www.python.org/);
-- [pytz 2023.3 or newer](https://pypi.org/project/pytz/).
+- [Python 3.10 or newer](https://www.python.org/).
 
 ## 2. Implementation details
 

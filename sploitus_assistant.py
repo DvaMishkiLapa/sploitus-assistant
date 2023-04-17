@@ -1,13 +1,9 @@
 import shlex
 from collections import ChainMap
-from datetime import datetime
 from json import dumps, loads
-from os import getenv
 from subprocess import CalledProcessError, check_output
 from threading import Semaphore, Thread
 from typing import Any, Dict, List
-
-from pytz import timezone
 
 headers = {
     # 'authority': 'sploitus.com',
@@ -50,7 +46,6 @@ class SploitusAssistant:
             sploitus_url: str = 'https://sploitus.com',
             semaphore: int = 4
     ) -> None:
-        self.tz = timezone(getenv('TZ', 'UTC'))
         self.targets = targets
         self.headers_dict = headers
         self.type = targets_type
@@ -110,28 +105,20 @@ class SploitusAssistant:
         sem = Semaphore(self.semaphore)
         threads = []
         output = []
-        now_datatime = datetime.now(self.tz)
         for t in self.targets:
             T = Thread(target=self.__dispatch, args=(sem, t), kwargs={'output': output})
             T.start()
             threads.append(T)
         for T in threads:
             T.join()
-        finish_time = datetime.now(self.tz)
-        return {
-            'targets_info': dict(ChainMap(*output)),
-            'time': {
-                'start_dt': now_datatime,
-                'finish_dt': finish_time,
-            }
-        }
+        return dict(ChainMap(*output))
 
 
 if __name__ == "__main__":
     result_domain = SploitusAssistant(
         targets=[
-            'Moodle',
-            'Gitlab',
+            'Moodle 4.*',
+            'Gitlab 15.*',
             'Minio',
             'Forefront',
             'Fortinet',
@@ -150,7 +137,7 @@ if __name__ == "__main__":
         offset=0,
         semaphore=8
     )
-    out = dumps(result_domain.result, indent=2, default=str)
+    out = dumps(result_domain.result, indent=4, default=str)
     # print(out)
     with open("output.json", "w") as outfile:
         outfile.write(out)
