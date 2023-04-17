@@ -11,10 +11,10 @@ headers = {
     # 'accept-language': 'en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7',
     'content-type': 'application/json',
     # 'dnt': 1,
-    # 'origin': 'https://sploitus.com',
+    'origin': 'https://sploitus.com',
     # 'referer': 'https://sploitus.com/?query=Moodle',
     # 'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-    # 'sec-ch-ua-mobile': '?0',
+    # 'sec-ch-ua-mobile': '?0',/
     # 'sec-ch-ua-platform': '"Windows"',
     # 'sec-fetch-dest': 'empty',
     # 'sec-fetch-mode': 'cors',
@@ -28,6 +28,7 @@ class SploitusAssistant:
     Class work with [sploitus.com](https://sploitus.com/)
     `targets`: targets for information
     `headers`: headers for `http` request
+    `curl_cmd`: version/wrapper used [curl-impersonate](https://github.com/lwthiker/curl-impersonate) (default: `curl_ff109`)
     `targets_type`: info type for targets (`exploits` or `tools`)
     `sort`: sort results (`default`, `date` or `score`)
     `title`: hide or show titles (default: `False`)
@@ -39,6 +40,7 @@ class SploitusAssistant:
             self,
             targets: List[str],
             headers: Dict[str, Any],
+            curl_cmd: str = 'curl_ff109',
             targets_type: str = 'exploits',
             sort: str = 'default',
             title: bool = False,
@@ -48,6 +50,7 @@ class SploitusAssistant:
     ) -> None:
         self.targets = targets
         self.headers_dict = headers
+        self.curl_cmd = curl_cmd
         self.type = targets_type
         self.sort = sort
         self.title = title
@@ -64,7 +67,8 @@ class SploitusAssistant:
         '''
         self.headers_dict.update({'referer': f'{self.sploitus_url}/?query={target}'})
         headers_for_curl = ' '.join([f"-H '{k}: {v}'" for k, v in self.headers_dict.items()])
-        cmd = "curl -s '{search_url}/search' {headers} --data-raw '{data}' --compressed".format(
+        cmd = "{curl_cmd} -s '{search_url}/search' {headers} --data-raw '{data}' --compressed".format(
+            curl_cmd=self.curl_cmd,
             search_url=self.sploitus_url,
             headers=headers_for_curl,
             data=dumps(
@@ -132,7 +136,7 @@ if __name__ == "__main__":
         ],
         headers=headers,
         targets_type='exploits',
-        sort='default',
+        sort='score',
         title=False,
         offset=0,
         semaphore=8
